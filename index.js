@@ -27,7 +27,7 @@ const supportingUrl = [
   'src',
 ];
 
-const regexURL = /\((.*?)\)/;
+const regexURL = /url\((.*?)\)/;
 const defaultOptions = {
   version: () => (new Date()).valueOf().toString(),
   variable: 'v',
@@ -42,12 +42,12 @@ const getVersion = () => {
 };
 
 const processChunk = (value) => {
-  if (value.startsWith('url(') && (value.startsWith('url("data:') || value.startsWith('url(\'data:'))) {
-    return value;
-  }
-  const hasUrl = value.match(regexURL)
-  if (hasUrl) {
-    const tmp = hasUrl[1].replace(/["']/g, '').split('#');
+  const innerUrl = value.match(regexURL)
+  if (innerUrl && innerUrl.length) {
+    if (innerUrl[1].startsWith('"data:') || value.startsWith('\'data:')) {
+      return value;
+    }
+    const tmp = innerUrl[1].replace(/["']/g, '').split('#');
     let url = tmp[0];
     if (url.endsWith('?')) { url = url.replace('?', ''); } // IE EOT Case
     if (url.includes('?')) { return value; } // There's a version string so we skip
@@ -56,12 +56,15 @@ const processChunk = (value) => {
     result = `${url}?${defaultOptions.variable}=${getVersion(url)}`;
     result = link ? `${result}#${link}` : result;
     result = `url("${result}")`;
-    return result;
+    return value.replace(regexURL, result);
   }
   return value;
 };
 
 const processValue = (value) => {
+  if (!value.includes('url(')) {
+    return value;
+  }
   if (value.startsWith('url("data:') || value.startsWith('url(\'data:')) {
     return value;
   }
