@@ -42,27 +42,33 @@ const getVersion = () => {
 };
 
 const processChunk = (value) => {
-  if (!value.startsWith('url(') || (value.startsWith('url(') && (value.startsWith('url("data:') || value.startsWith('url(\'data:')))) {
+  if (value.startsWith('url(') && (value.startsWith('url("data:') || value.startsWith('url(\'data:'))) {
     return value;
   }
-
-  const tmp = value.match(regexURL)[1].replace(/["']/g, '').split('#');
-  let url = tmp[0];
-  if (url.endsWith('?')) { url = url.replace('?', ''); } // IE EOT Case
-  if (url.includes('?')) { return value; } // There's a version string so we skip
-  const link = tmp[1];
-  let result;
-  result = `${url}?${defaultOptions.variable}=${getVersion(url)}`;
-  result = link ? `${result}#${link}` : result;
-  result = `url("${result}")`;
-  return result;
+  const hasUrl = value.match(regexURL)
+  if (hasUrl) {
+    const tmp = hasUrl[1].replace(/["']/g, '').split('#');
+    let url = tmp[0];
+    if (url.endsWith('?')) { url = url.replace('?', ''); } // IE EOT Case
+    if (url.includes('?')) { return value; } // There's a version string so we skip
+    const link = tmp[1];
+    let result;
+    result = `${url}?${defaultOptions.variable}=${getVersion(url)}`;
+    result = link ? `${result}#${link}` : result;
+    result = `url("${result}")`;
+    return result;
+  }
+  return value;
 };
 
 const processValue = (value) => {
-  const chunksValue = value.split(' ');
-  if (chunksValue.length > 1) {
+  if (value.startsWith('url("data:') || value.startsWith('url(\'data:')) {
+    return value;
+  }
+  const chunksValue = value.split(',');
+  if (chunksValue.length) {
     const chunks = chunksValue.map((chunk) => processChunk(chunk));
-    return chunks.join(' ');
+    return chunks.join(',');
   }
   return processChunk(value);
 };
@@ -74,14 +80,19 @@ module.exports = (opts) => {
     Once(root) {
       // eslint-disable-next-line consistent-return
       root.walkDecls((decl) => {
-        if (supportingUrl.includes(decl.prop) && decl.value.startsWith('url(')) {
-          if (decl.value.startsWith('url("data:') || decl.value.startsWith('url(\'data:')) {
-            return decl.value;
-          }
-
+        if (supportingUrl.includes(decl.prop)) {
           decl.value = processValue(decl.value);
         }
       });
+      // Imports
+      root.walkAtRules(atRule => {
+        if (atRule.name === 'import') {
+          const url = atRule.params.replace(/["']/g, '');
+          if (url.startsWith('../') || url.startsWith('./') || url.startsWith('/') || url.startsWith('http')) {
+            atRule.params = `"${url}?${defaultOptions.variable}=${getVersion(url)}"`;
+          }
+        }
+      })
     },
   };
 };
