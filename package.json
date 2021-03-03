@@ -1,0 +1,34 @@
+{
+  "name": "postcss-url-version",
+  "version": "0.0.2",
+  "description": "A simple PostCSS plugin that adds a hash on every url property",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dgrammatiko/postcss-url-version.git"
+  },
+  "keywords": [
+    "postcss",
+    "url",
+    "hash",
+    "version",
+    "versioning",
+    "image",
+    "font"
+  ],
+  "author": "Dimitris Grammatikogiannis <d.grammatiko@gmail.com> (https://dgrammatiko.online/)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/dgrammatiko/postcss-url-version/issues"
+  },
+  "homepage": "https://github.com/dgrammatiko/postcss-url-version#readme",
+  "devDependencies": {
+    "postcss": "^8.2.6"
+  },
+  "files": [
+    "index.js"
+  ]
+}
