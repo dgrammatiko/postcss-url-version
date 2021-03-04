@@ -26,4 +26,20 @@ Use as any other PostCSS plugin:
 Postcss([Autoprefixer, UrlVersion])...
 ```
 
+## Options
+There are 2 options, `version` and `variable`:
+- `version` could be a function or a string
+- `variable` could be a a string denoting the URLparam that will be used for the version
+
+eg:
+
+```js
+const UrlVersion = require('postcss-url-version');
+const versioned = UrlVersion({
+  version: (new Date()).valueOf().toString(),
+  variable: 'v',
+});
+Postcss([versioned])...
+```
+
 License MIT
