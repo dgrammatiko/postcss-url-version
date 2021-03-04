@@ -40,6 +40,8 @@ const versioned = UrlVersion({
   variable: 'v',
 });
 Postcss([versioned])...
+
+// Will produce something like url("https://mdn.mozillademos.org/files/16761/star.gif?v=1212345433");
 ```
 
 License MIT
