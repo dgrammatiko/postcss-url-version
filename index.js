@@ -5,9 +5,6 @@
 
 // List from https://developer.mozilla.org/en-US/docs/Web/CSS/url()
 const supportingUrl = [
-  '@import',
-  '@document',
-  '@namespace',
   'background',
   'background-image',
   'border-image',
