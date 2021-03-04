@@ -8,10 +8,10 @@ const version = '?v=123';
 
 const assert = (input, output, test) => {
   if (input === output) {
-    console.log(`Test ${test} passed ✅`)
+    console.log(`✅ Test ${test} passed`)
     // console.log({input: output})
   } else {
-    console.log(`Test ${test} failed ❌`)
+    console.log(`❌ Test ${test} failed`)
     console.log({[input]: output})
   }
 }
@@ -30,43 +30,43 @@ const assert = (input, output, test) => {
   assert(
     `body { list-style-image: url("../images/bullet.jpg${version}"); }`,
     (await UrlProc.process("body { list-style-image: url('../images/bullet.jpg'); }", { from: undefined })).css,
-    'associated properties #2'
+    'Associated properties #2'
   );
 
   assert(
     `body { content: url("pdficon.jpg${version}"); }`,
     (await UrlProc.process('body { content: url("pdficon.jpg"); }', { from: undefined })).css,
-    'associated properties #3'
+    'Associated properties #3'
   );
 
   assert(
     `body { cursor: url("mycursor.cur${version}"); }`,
     (await UrlProc.process('body { cursor: url(mycursor.cur); }', { from: undefined })).css,
-    'associated properties #4'
+    'Associated properties #4'
   );
 
   assert(
     `body { border-image-source: url("/media/diamonds.png${version}"); }`,
     (await UrlProc.process('body { border-image-source: url(/media/diamonds.png); }', { from: undefined })).css,
-    'associated properties #5'
+    'Associated properties #5'
   );
 
   assert(
     `@font-face { font-family: 'Open Sans'; { src: url("fantasticfont.woff${version}"); } }`,
     (await UrlProc.process("@font-face { font-family: 'Open Sans'; { src: url('fantasticfont.woff'); } }", { from: undefined })).css,
-    'associated properties #6'
+    'Associated properties #6'
   );
 
   assert(
     `body { offset-path: url(#path); }`,
     (await UrlProc.process('body { offset-path: url(#path); }', { from: undefined })).css,
-    'associated properties #7'
+    'Associated properties #7'
   );
 
   assert(
     `body { mask-image: url("masks.svg${version}#mask1"); }`,
     (await UrlProc.process('body { mask-image: url("masks.svg#mask1"); }', { from: undefined })).css,
-    'associated properties #8'
+    'Associated properties #8'
   );
 
   /**
