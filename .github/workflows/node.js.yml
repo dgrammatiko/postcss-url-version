@@ -27,3 +27,6 @@ jobs:
         node-version: ${{ matrix.node-version }}
     - run: npm ci
     - run: npm test
+    - name: Dynamic Badges
+      uses: Schneegans/dynamic-badges-action@v1.0.0
+
