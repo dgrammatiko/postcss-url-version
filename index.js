@@ -27,7 +27,7 @@ const supportingUrl = [
   'src',
 ];
 
-const regexURL = /url\((.*?)\)/;
+const regexURL = /url\((.*?)\)/gi;
 const defaultOptions = {
   version: () => (new Date()).valueOf().toString(),
   variable: 'v',
@@ -44,19 +44,26 @@ const getVersion = () => {
 const processChunk = (value) => {
   const innerUrl = value.match(regexURL)
   if (innerUrl && innerUrl.length) {
-    if (innerUrl[1].startsWith('"data:') || value.startsWith('\'data:')) {
+    if (innerUrl[0].startsWith('url("data:') || innerUrl[0].startsWith('url(\'data:')) {
       return value;
     }
-    const tmp = innerUrl[1].replace(/["']/g, '').split('#');
-    let url = tmp[0];
-    if (url.endsWith('?')) { url = url.replace('?', ''); } // IE EOT Case
-    if (url.includes('?')) { return value; } // There's a version string so we skip
-    const link = tmp[1];
-    let result;
-    result = `${url}?${defaultOptions.variable}=${getVersion(url)}`;
-    result = link ? `${result}#${link}` : result;
-    result = `url("${result}")`;
-    return value.replace(regexURL, result);
+    let final = value
+    innerUrl.forEach(element => {
+      const newVal = element.match(/url\((.*?)\)/)
+      const tmp = newVal[1].replace(/["']/g, '').split('#');
+      let url = tmp[0];
+      if (url === '') { return value; }
+      if (url.endsWith('?')) { url = url.replace('?', ''); } // IE EOT Case
+      if (url.includes('?')) { return value; } // There's a version string so we skip
+      const link = tmp[1];
+      let result;
+      result = `${url}?${defaultOptions.variable}=${getVersion(url)}`;
+      result = link ? `${result}#${link}` : result;
+      result = `url("${result}")`;
+      final = final.replace(element, result);
+    });
+
+    return final
   }
   return value;
 };
@@ -89,11 +96,8 @@ module.exports = (opts) => {
       });
       // Imports
       root.walkAtRules(atRule => {
-        if (atRule.name === 'import') {
-          const url = atRule.params.replace(/["']/g, '');
-          if (url.startsWith('../') || url.startsWith('./') || url.startsWith('/') || url.startsWith('http')) {
-            atRule.params = `"${url}?${defaultOptions.variable}=${getVersion(url)}"`;
-          }
+        if (['import', 'document', 'namespace'].includes(atRule.name)) {
+          atRule.params = processValue(atRule.params);
         }
       })
     },
