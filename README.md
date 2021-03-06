@@ -36,7 +36,9 @@ eg:
 ```js
 const UrlVersion = require('postcss-url-version');
 const versioned = UrlVersion({
-  version: (new Date()).valueOf().toString(),
+  // The path of the asset relative to the css is passed as argument to the function,
+  // so you can hash the content of the file for a better invalidation strategy
+  version: (path) => { return (new Date()).valueOf().toString(); },
   variable: 'v',
 });
 Postcss([versioned])...
