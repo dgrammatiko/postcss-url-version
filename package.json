@@ -26,7 +26,7 @@
   },
   "homepage": "https://github.com/dgrammatiko/postcss-url-version#readme",
   "devDependencies": {
-    "postcss": "8.3.4"
+    "postcss": "8.3.5"
   },
   "files": [
     "index.js"
