@@ -1,6 +1,6 @@
 {
   "name": "postcss-url-version",
-  "version": "0.0.6",
+  "version": "1.0.0",
   "description": "A simple PostCSS plugin that adds a hash on every url property",
   "main": "index.js",
   "scripts": {
