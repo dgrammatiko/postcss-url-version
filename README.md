@@ -28,7 +28,7 @@ Postcss([Autoprefixer, UrlVersion])...
 
 ## Options
 There are 2 options, `version` and `variable`:
-- `version` could be a function or a string
+- `version`  a function that returns a string for the hash
 - `variable` could be a a string denoting the URLparam that will be used for the version
 
 eg:
@@ -38,7 +38,7 @@ const UrlVersion = require('postcss-url-version');
 const versioned = UrlVersion({
   // The path of the asset relative to the css is passed as argument to the function,
   // so you can hash the content of the file for a better invalidation strategy
-  version: (path) => { return (new Date()).valueOf().toString(); },
+  version: (path) => new Date().valueOf().toString(),
   variable: 'v',
 });
 Postcss([versioned])...
