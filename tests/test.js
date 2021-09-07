@@ -1,9 +1,31 @@
 const PostsCss = require('postcss');
+const { join } = require('path');
+const { existsSync, readFileSync } = require('fs');
+const crypto = require('crypto');
 const UrlVersion = require('../index.js');
 
 const UrlProc = PostsCss([UrlVersion({
-  version: ()=>{ return 123 }
+  version: (imagePath, sourceCssPath) =>{
+    if (!sourceCssPath) {
+      return 123;
+    }
+
+    if (
+      existsSync(join(sourceCssPath, imagePath))
+      && !(imagePath.startsWith('http') || imagePath.startsWith('//'))
+      && existsSync(join(sourceCssPath, imagePath))
+    ) {
+      const fileBuffer = readFileSync(join(sourceCssPath, imagePath));
+      const hashSum = crypto.createHash('md5');
+      hashSum.update(fileBuffer);
+
+      return '1631026846905';
+    }
+
+    return 123;
+  }
 })]);
+
 const version = '?v=123';
 
 const assert = (input, output, test) => {
@@ -137,5 +159,26 @@ const assert = (input, output, test) => {
     `@namespace url("http://www.w3.org/1999/xhtml${version}")`,
     (await UrlProc.process('@namespace url(http://www.w3.org/1999/xhtml)', { from: undefined })).css,
     'At-rules #17'
+  );
+
+  /**
+   * Associated properties reading a source file
+   */
+  assert(
+    `body {\n  list-style-image: url("../images/bullet.jpg?v=1631026846905");\n}\n`,
+    (await UrlProc.process(readFileSync('./tests/test.css'), { from: 'tests/test.css' })).css,
+    'Associated properties with Source File #1'
+  );
+
+  assert(
+    `body {\n  list-style-image: url("../images/bullet.jpg?v=123");\n}\n`,
+    (await UrlProc.process(readFileSync('./tests/test.css'), { from: undefined })).css, //, { from: undefined }
+    'Associated properties with Source File #2'
+  );
+
+  assert(
+    `body {\n  list-style-image: url("../images/bullet.jpg?v=123");\n}\n`,
+    (await UrlProc.process(readFileSync('./tests/test.css'))).css, //, { from: undefined }
+    'Associated properties with Source File #2'
   );
 })();

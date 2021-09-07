@@ -2,6 +2,8 @@
  * Author: Dimitris Grammatikogiannis
  * License: MIT
  */
+const { existsSync } = require('fs');
+const { dirname, resolve } = require('path');
 
 // List from https://developer.mozilla.org/en-US/docs/Web/CSS/url()
 const supportingUrl = [
@@ -26,19 +28,30 @@ const supportingUrl = [
 
 const regexURL = /url\((.*?)\)/gi;
 const defaultOptions = {
-  version: () => (new Date()).valueOf().toString(),
+  version: (imagePath, sourceCssPath) =>{
+    if (!sourceCssPath) {
+      return (new Date()).valueOf().toString();
+    }
+
+    const directory = dirname(sourceCssPath);
+    if (
+      existsSync(resolve(`${directory}/${imagePath}`))
+      && !(imagePath.startsWith('http') || imagePath.startsWith('//'))
+      && existsSync(resolve(`${directory}/${imagePath}`))
+    ) {
+      const fileBuffer = readFileSync(resolve(`${directory}/${imagePath}`));
+      const hashSum = crypto.createHash('md5');
+      hashSum.update(fileBuffer);
+
+      return hashSum.digest('hex');
+    }
+
+    return (new Date()).valueOf().toString();
+  },
   variable: 'v',
 };
 
-const getVersion = () => {
-  const { version } = defaultOptions;
-  if (typeof version === 'function') {
-    return defaultOptions.version();
-  }
-  return version;
-};
-
-const processChunk = (value) => {
+const processChunk = (value, decl, opts) => {
   const innerUrl = value.match(regexURL)
   if (innerUrl && innerUrl.length) {
     if (innerUrl[0].startsWith('url("data:') || innerUrl[0].startsWith('url(\'data:')) {
@@ -54,7 +67,7 @@ const processChunk = (value) => {
       if (url.includes('?')) { return value; } // There's a version string so we skip
       const link = tmp[1];
       let result;
-      result = `${url}?${defaultOptions.variable}=${getVersion(url)}`;
+      result = `${url}?${defaultOptions.variable}=${opts.version(url, decl)}`;
       result = link ? `${result}#${link}` : result;
       result = `url("${result}")`;
       final = final.replace(element, result);
@@ -65,7 +78,7 @@ const processChunk = (value) => {
   return value;
 };
 
-const processValue = (value) => {
+const processValue = (value, decl, opts) => {
   if (!value.includes('url(')) {
     return value;
   }
@@ -74,27 +87,26 @@ const processValue = (value) => {
   }
   const chunksValue = value.split(',');
   if (chunksValue.length) {
-    const chunks = chunksValue.map((chunk) => processChunk(chunk));
+    const chunks = chunksValue.map((chunk) => processChunk(chunk, decl, opts));
     return chunks.join(',');
   }
-  return processChunk(value);
+  return processChunk(value, decl, opts);
 };
 
 module.exports = (opts) => {
-  Object.assign(defaultOptions, opts);
   return {
     postcssPlugin: 'postcss-url-versioner',
     Once(root) {
       // eslint-disable-next-line consistent-return
       root.walkDecls((decl) => {
         if (supportingUrl.includes(decl.prop)) {
-          decl.value = processValue(decl.value);
+          decl.value = processValue(decl.value, root.source.input.file, opts);
         }
       });
       // Imports
       root.walkAtRules(atRule => {
         if (['import', 'document', 'namespace'].includes(atRule.name)) {
-          atRule.params = processValue(atRule.params);
+          atRule.params = processValue(atRule.params, root.source.input.file, opts);
         }
       })
     },
