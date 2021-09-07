@@ -1,6 +1,6 @@
 {
   "name": "postcss-url-version",
-  "version": "0.0.6",
+  "version": "1.0.0",
   "description": "A simple PostCSS plugin that adds a hash on every url property",
   "main": "index.js",
   "scripts": {
@@ -26,7 +26,7 @@
   },
   "homepage": "https://github.com/dgrammatiko/postcss-url-version#readme",
   "devDependencies": {
-    "postcss": "8.2.7"
+    "postcss": "8.3.6"
   },
   "files": [
     "index.js"
