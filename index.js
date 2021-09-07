@@ -51,7 +51,7 @@ const defaultOptions = {
   variable: 'v',
 };
 
-const processChunk = (value, decl, opts) => {
+const processChunk = (value, decl, versionFn) => {
   const innerUrl = value.match(regexURL)
   if (innerUrl && innerUrl.length) {
     if (innerUrl[0].startsWith('url("data:') || innerUrl[0].startsWith('url(\'data:')) {
@@ -67,7 +67,7 @@ const processChunk = (value, decl, opts) => {
       if (url.includes('?')) { return value; } // There's a version string so we skip
       const link = tmp[1];
       let result;
-      result = `${url}?${defaultOptions.variable}=${opts.version(url, decl)}`;
+      result = `${url}?${defaultOptions.variable}=${versionFn(url, decl)}`;
       result = link ? `${result}#${link}` : result;
       result = `url("${result}")`;
       final = final.replace(element, result);
@@ -78,7 +78,7 @@ const processChunk = (value, decl, opts) => {
   return value;
 };
 
-const processValue = (value, decl, opts) => {
+const processValue = (value, decl, versionFn) => {
   if (!value.includes('url(')) {
     return value;
   }
@@ -87,26 +87,27 @@ const processValue = (value, decl, opts) => {
   }
   const chunksValue = value.split(',');
   if (chunksValue.length) {
-    const chunks = chunksValue.map((chunk) => processChunk(chunk, decl, opts));
+    const chunks = chunksValue.map((chunk) => processChunk(chunk, decl, versionFn));
     return chunks.join(',');
   }
-  return processChunk(value, decl, opts);
+  return processChunk(value, decl, versionFn);
 };
 
 module.exports = (opts) => {
+  const options = Object.assign({}, defaultOptions, opts);
   return {
     postcssPlugin: 'postcss-url-versioner',
     Once(root) {
       // eslint-disable-next-line consistent-return
       root.walkDecls((decl) => {
         if (supportingUrl.includes(decl.prop)) {
-          decl.value = processValue(decl.value, root.source.input.file, opts);
+          decl.value = processValue(decl.value, root.source.input.file, options.version);
         }
       });
       // Imports
       root.walkAtRules(atRule => {
-        if (['import', 'document', 'namespace'].includes(atRule.name)) {
-          atRule.params = processValue(atRule.params, root.source.input.file, opts);
+        if (['import', 'document'].includes(atRule.name)) { //, 'namespace'
+          atRule.params = processValue(atRule.params, root.source.input.file, options.version);
         }
       })
     },
