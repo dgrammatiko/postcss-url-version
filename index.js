@@ -3,8 +3,7 @@
  * License: MIT
  */
 const { existsSync, readFileSync } = require('fs');
-const { join } = require('path');
-const { existsSync, readFileSync } = require('fs');
+const { dirname, join, resolve } = require('path');
 const crypto = require('crypto');
 
 // List from https://developer.mozilla.org/en-US/docs/Web/CSS/url()
@@ -31,16 +30,15 @@ const supportingUrl = [
 const regexURL = /url\((.*?)\)/gi;
 const defaultOptions = {
   version: (imagePath, sourceCssPath) =>{
-    if (!sourceCssPath) {
+    if (!existsSync(sourceCssPath)) {
       return (new Date()).valueOf().toString();
     }
 
     if (
-      existsSync(join(sourceCssPath, imagePath))
+      existsSync(resolve(dirname(sourceCssPath), imagePath))
       && !(imagePath.startsWith('http') || imagePath.startsWith('//'))
-      && existsSync(join(sourceCssPath, imagePath))
     ) {
-      const fileBuffer = readFileSync(join(sourceCssPath, imagePath));
+      const fileBuffer = readFileSync(resolve(dirname(sourceCssPath), imagePath));
       const hashSum = crypto.createHash('md5');
       hashSum.update(fileBuffer);
 
