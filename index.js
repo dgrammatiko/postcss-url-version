@@ -2,7 +2,7 @@
  * Author: Dimitris Grammatikogiannis
  * License: MIT
  */
-const { existsSync } = require('fs');
+const { existsSync, readFileSync } = require('fs');
 const { dirname, resolve } = require('path');
 
 // List from https://developer.mozilla.org/en-US/docs/Web/CSS/url()
