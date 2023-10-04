@@ -157,7 +157,7 @@ const assert = (input, output, test) => {
 
   assert(
     `@namespace url("http://www.w3.org/1999/xhtml")`,
-    (await UrlProc.process('@namespace url(http://www.w3.org/1999/xhtml)', { from: undefined })).css,
+    (await UrlProc.process('@namespace url("http://www.w3.org/1999/xhtml")', { from: undefined })).css,
     'At-rules #17'
   );
 
