@@ -106,7 +106,7 @@ module.exports = (opts) => {
       });
       // Imports
       root.walkAtRules(atRule => {
-        if (['import', 'document'].includes(atRule.name)) { //, 'namespace'
+        if (['import'].includes(atRule.name)) { // SKIP 'document', 'namespace'
           atRule.params = processValue(atRule.params, root.source.input.file, options.version);
         }
       })
