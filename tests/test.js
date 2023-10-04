@@ -144,9 +144,9 @@ const assert = (input, output, test) => {
    * At-rules
    */
   assert(
-    `@document url("https://www.example.com/${version}")`,
+    `@document url("https://www.example.com/")`,
     (await UrlProc.process('@document url("https://www.example.com/")', { from: undefined })).css,
-    'At-rules #15'
+    'At-rules @document SKIPPED #15'
   );
 
   assert(
@@ -158,7 +158,7 @@ const assert = (input, output, test) => {
   assert(
     `@namespace url("http://www.w3.org/1999/xhtml")`,
     (await UrlProc.process('@namespace url("http://www.w3.org/1999/xhtml")', { from: undefined })).css,
-    'At-rules #17'
+    'At-rules @namespace: SKIPPED #17'
   );
 
   /**
