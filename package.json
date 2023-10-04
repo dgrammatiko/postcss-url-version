@@ -1,10 +1,11 @@
 {
   "name": "postcss-url-version",
-  "version": "1.0.0",
+  "version": "1.0.4",
   "description": "A simple PostCSS plugin that adds a hash on every url property",
   "main": "index.js",
   "scripts": {
-    "test": "node ./tests/test.js"
+    "test": "node ./tests/test.js",
+    "update": "npm install $(npm outdated | cut -d' ' -f 1 | sed '1d' | xargs -I '$' echo '$@latest' | xargs echo)  --save-exact"
   },
   "repository": {
     "type": "git",
