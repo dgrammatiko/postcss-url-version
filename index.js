@@ -4,6 +4,8 @@
  */
 const { existsSync } = require('fs');
 const { dirname, resolve } = require('path');
+const { createHash } = require('crypto');
+const IS_VAR_PROP = /(--(.+))/;
 
 // List from https://developer.mozilla.org/en-US/docs/Web/CSS/url()
 const supportingUrl = [
@@ -28,27 +30,16 @@ const supportingUrl = [
 
 const regexURL = /url\((.*?)\)/gi;
 const defaultOptions = {
+  variable: 'v',
   version: (imagePath, sourceCssPath) =>{
-    if (!sourceCssPath) {
+    if (!sourceCssPath || (url.startsWith('http') || url.startsWith('//')))
       return (new Date()).valueOf().toString();
-    }
 
-    const directory = dirname(sourceCssPath);
-    if (
-      existsSync(resolve(`${directory}/${imagePath}`))
-      && !(imagePath.startsWith('http') || imagePath.startsWith('//'))
-      && existsSync(resolve(`${directory}/${imagePath}`))
-    ) {
-      const fileBuffer = readFileSync(resolve(`${directory}/${imagePath}`));
-      const hashSum = crypto.createHash('md5');
-      hashSum.update(fileBuffer);
-
-      return hashSum.digest('hex');
-    }
+    if (existsSync(resolve(`${dirname(sourceCssPath)}/${imagePath}`)))
+      return (createHash('md5')).update(readFileSync(resolve(`${dirname(sourceCssPath)}/${imagePath}`))).digest('hex');
 
     return (new Date()).valueOf().toString();
   },
-  variable: 'v',
 };
 
 const processChunk = (value, decl, versionFn) => {
@@ -79,10 +70,7 @@ const processChunk = (value, decl, versionFn) => {
 };
 
 const processValue = (value, decl, versionFn) => {
-  if (!value.includes('url(')) {
-    return value;
-  }
-  if (value.startsWith('url("data:') || value.startsWith('url(\'data:')) {
+  if (!value.includes('url(') || value.startsWith('url("data:') || value.startsWith('url(\'data:')) {
     return value;
   }
   const chunksValue = value.split(',');
@@ -100,7 +88,7 @@ module.exports = (opts) => {
     Once(root) {
       // eslint-disable-next-line consistent-return
       root.walkDecls((decl) => {
-        if (supportingUrl.includes(decl.prop)) {
+        if (supportingUrl.includes(decl.prop) || IS_VAR_PROP.test(decl.prop)) {
           decl.value = processValue(decl.value, root.source.input.file, options.version);
         }
       });
