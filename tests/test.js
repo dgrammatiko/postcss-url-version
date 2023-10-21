@@ -181,4 +181,25 @@ const assert = (input, output, test) => {
     (await UrlProc.process(readFileSync('./tests/test.css'))).css, //, { from: undefined }
     'Associated properties with Source File #2'
   );
+
+  /**
+   * CSS properties
+   */
+    assert(
+      `:root { --tested: url("../images/bullet.jpg${version}"); }`,
+      (await UrlProc.process(':root { --tested: url("../images/bullet.jpg"); }', { from: undefined })).css,
+      'CSS properties, root #1'
+    );
+
+    assert(
+      `.yay { --tested: url("../images/bullet.jpg${version}"); }`,
+      (await UrlProc.process('.yay { --tested: url("../images/bullet.jpg"); }', { from: undefined })).css,
+      'CSS properties, class #2'
+    );
+
+    assert(
+      `select { --tested: url("../images/bullet.jpg${version}"); }`,
+      (await UrlProc.process('select { --tested: url("../images/bullet.jpg"); }', { from: undefined })).css,
+      'CSS properties, element #3'
+    );
 })();
